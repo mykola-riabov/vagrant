@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "ncs1web" do |ncs1web|
+   ncs1web.vm.box = "bento/ubuntu-20.04"
+   ncs1web.vm.synced_folder ".", "/vagrant", disabled: true
+   ncs1web.vm.communicator = "ssh"
+   ncs1web.vm.ignore_box_vagrantfile = true
+   ncs1web.vm.hostname = "ncs1-web"
+   ncs1web.vm.network "private_network", ip: "192.168.60.20"
+   ncs1web.vm.network "forwarded_port", guest: 80, host: 22080
+   ncs1web.vm.provider "virtualbox" do |vb1|
+    vb1.name = "ncs1-web"
+    vb1.customize ["modifyvm", :id, "--memory", "512"]
+    vb1.customize ["modifyvm", :id, "--cpus", "1"]
+    vb1.customize ["modifyvm", :id, "--vram", "8"]
+    vb1.customize ["modifyvm", :id, "--groups", "/vagrant"]
+   end
+   ncs1web.ssh.username = "vagrant"
+   ncs1web.ssh.password = "vagrant"
+   ncs1web.vm.provision "file", source: "./nc-web.sh", destination: "/home/vagrant/script/nc-web.sh"
+   ncs1web.vm.provision "shell", inline: "/home/vagrant/script/nc-web.sh"
+  end
+## host data base
+  config.vm.define "ncs2db" do |ncs2db|
+   ncs2db.vm.box = "bento/ubuntu-20.04"
+   ncs2db.vm.synced_folder ".", "/vagrant", disabled: true
+   ncs2db.vm.communicator = "ssh"
+   ncs2db.vm.ignore_box_vagrantfile = true
+   ncs2db.vm.hostname = "ncs2-db"
+   ncs2db.vm.network "private_network", ip: "192.168.60.21"
+   ncs2db.vm.provider "virtualbox" do |vb1|
+    vb1.name = "ncs2-db"
+    vb1.customize ["modifyvm", :id, "--memory", "512"]
+    vb1.customize ["modifyvm", :id, "--cpus", "1"]
+    vb1.customize ["modifyvm", :id, "--vram", "8"]
+    vb1.customize ["modifyvm", :id, "--groups", "/vagrant"]
+   end
+   ncs2db.ssh.username = "vagrant"
+   ncs2db.ssh.password = "vagrant"
+   ncs2db.vm.provision "file", source: "./nc-bd.sh", destination: "/home/vagrant/script/nc-bd.sh"
+   ncs2db.vm.provision "shell", inline: "/home/vagrant/script/nc-bd.sh"
+  end
+##=====
+end
